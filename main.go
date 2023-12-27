@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"io"
 )
 
 func main() {
@@ -12,7 +15,7 @@ func main() {
 	err := organizeFiles(sourceDir, destDir)
 	if err != nil {
 		fmt.Println("Error organizing files:", err)
-	}
+	}s
 
 
 	// http.HandleFunc("/", handler)
@@ -25,22 +28,31 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func organizeFiles(sourcePath, destPath string) error {
-	err := filePath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+func organizeFiles(sourceDir, destDir string) error {
+	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.isDir() {
+		if info.IsDir() {
 			return nil
 		}
-	},
 
-	// fileType := getFileType
+		fileType := getFileType(info.Name()) 	
+
+		destFolder := filepath.Join(destDir, fileType)
+		if err := os.MkdirAll(destFolder, os.ModePerm); err != nil {
+			return err
+		}
+
+		destPath := filepath.Join(destFolder, info.Name())
+			return moveFile(path, destPath)
+	})
+
 	return err
 }
 
 func getFileType(fileName string) string {
-	ext := filePath.Ext(fileName)
+	ext := filepath.Ext(fileName)
 	switch ext {
 	case ".jpg", ".png", ".webp":
 		return "Images"
@@ -55,4 +67,26 @@ func getFileType(fileName string) string {
 	default:
 		return "Other"
 	}
+}
+
+func moveFile(source, destination string) error {
+	sourceFile, err := os.Open(source) {
+	if err != nil {
+		return err
+	}
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(destination)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(source)
 }
