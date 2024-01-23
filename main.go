@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"io"
 )
 
 func main() {
@@ -15,8 +15,7 @@ func main() {
 	err := organizeFiles(sourceDir, destDir)
 	if err != nil {
 		fmt.Println("Error organizing files:", err)
-	}s
-
+	}
 
 	// http.HandleFunc("/", handler)
 	// http.ListenAndServe(":8081", nil)
@@ -27,7 +26,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, World")
 }
 
-
 func organizeFiles(sourceDir, destDir string) error {
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -37,7 +35,7 @@ func organizeFiles(sourceDir, destDir string) error {
 			return nil
 		}
 
-		fileType := getFileType(info.Name()) 	
+		fileType := getFileType(info.Name())
 
 		destFolder := filepath.Join(destDir, fileType)
 		if err := os.MkdirAll(destFolder, os.ModePerm); err != nil {
@@ -45,7 +43,7 @@ func organizeFiles(sourceDir, destDir string) error {
 		}
 
 		destPath := filepath.Join(destFolder, info.Name())
-			return moveFile(path, destPath)
+		return moveFile(path, destPath)
 	})
 
 	return err
@@ -67,14 +65,14 @@ func getFileType(fileName string) string {
 	default:
 		return "Other"
 	}
-} 
+}
 
 func moveFile(source, destination string) error {
-	sourceFile, err := os.Open(source) {
+	sourceFile, err := os.Open(source)
 	if err != nil {
 		return err
 	}
-	}
+
 	defer sourceFile.Close()
 
 	destFile, err := os.Create(destination)
