@@ -62,12 +62,12 @@ func getFileType(fileName string) string {
 		return "Documents"
 	case ".mp4", ".avi", ".mkv":
 		return "Videos"
-	case ".mp3":
+	case ".mp3", ".mp4":
 		return "Music"
 	default:
 		return "Other"
 	}
-}
+} 
 
 func moveFile(source, destination string) error {
 	sourceFile, err := os.Open(source) {
