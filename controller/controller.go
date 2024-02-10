@@ -1,18 +1,33 @@
 package controller
 
-import "log"
+import (
+	"fmt"
+	"log"
 
-func ssh(compName, destination string) error {
+	"golang.org/x/crypto/ssh"
+)
+
+func Connect(compName, destination string) error {
 	config := &ssh.ClientConfig{
 		User: "username",
 		Auth: []ssh.AuthMethod{
 			ssh.Password("insertpasshere"),
 		},
-		HostKeyCallBack: ssh.FixedHostKey(hostKey),
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	client, err := ssh.Dial("tcp", "servername.com:22", config)
 	if err != nil {
 		log.Fatal("Failed to dial: ", err)
 	}
-	defer client.Close()
+	session, err := client.NewSession()
+	if err != nil {
+		client.Close()
+		log.Fatalf("Failed to create session: %s", err)
+	}
+	output, err := session.CombinedOutput("ls -l")
+	if err != nil {
+		log.Fatalf("Failed to run: %s", err)
+	}
+	fmt.Println(string(output))
+	return nil
 }
